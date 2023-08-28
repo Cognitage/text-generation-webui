@@ -216,7 +216,7 @@ def messages_to_prompt(body: dict, req_params: dict, max_tokens):
             raise InvalidRequestError(message="messages: missing role", param='messages')
         if 'content' not in m:
             raise InvalidRequestError(message="messages: missing content", param='messages')
-        
+
         role = m['role']
         content = m['content']
         # name = m.get('name', None)
@@ -256,7 +256,9 @@ def chat_completions(body: dict, is_legacy: bool = False) -> dict:
     resp_list = 'data' if is_legacy else 'choices'
 
     # common params
+    print('BODY:', body)
     req_params = marshal_common_params(body)
+    print('REQ_PARAMS:', req_params)
     req_params['stream'] = False
     requested_model = req_params.pop('requested_model')
     logprob_proc = req_params.pop('logprob_proc', None)
