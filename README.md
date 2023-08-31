@@ -75,11 +75,6 @@ conda activate textgen
 
 The up-to-date commands can be found here: https://pytorch.org/get-started/locally/. 
 
-#### 2.1 Additional information
-
-* MacOS users: https://github.com/oobabooga/text-generation-webui/pull/393
-* AMD users: https://rentry.org/eq3hg
-
 #### 3. Install the web UI
 
 ```
@@ -88,17 +83,26 @@ cd text-generation-webui
 pip install -r requirements.txt
 ```
 
-#### llama.cpp on AMD, Metal, and some specific CPUs
+#### AMD, Metal, Intel Arc, and CPUs without AVCX2
 
-Precompiled wheels are included for CPU-only and NVIDIA GPUs (cuBLAS). For AMD, Metal, and some specific CPUs, you need to uninstall those wheels and compile llama-cpp-python yourself.
-
-To uninstall:
+1) Replace the last command above with
 
 ```
-pip uninstall -y llama-cpp-python llama-cpp-python-cuda
+pip install -r requirements_nocuda.txt
 ```
 
-To compile: https://github.com/abetlen/llama-cpp-python#installation-with-openblas--cublas--clblast--metal
+2) Manually install llama-cpp-python using the appropriate command for your hardware: [Installation from PyPI](https://github.com/abetlen/llama-cpp-python#installation-from-pypi).
+
+3) AMD: Manually install AutoGPTQ: [Installation](https://github.com/PanQiWei/AutoGPTQ#installation).
+
+4) AMD: Manually install [ExLlama](https://github.com/turboderp/exllama) by simply cloning it into the `repositories` folder (it will be automatically compiled at runtime after that):
+
+```
+cd text-generation-webui
+mkdir repositories
+cd repositories
+git clone https://github.com/turboderp/exllama
+```
 
 #### bitsandbytes on older NVIDIA GPUs
 
@@ -154,9 +158,7 @@ text-generation-webui
 │   │   └── tokenizer.model
 ```
 
-In the "Model" tab of the UI, those models can be automatically downloaded from Hugging Face. You can also download them via the command-line with `python download-model.py organization/model`.
-
-* GGML models are a single file and should be placed directly into `models`. Example:
+* GGML/GGUF models are a single file and should be placed directly into `models`. Example:
 
 ```
 text-generation-webui
@@ -164,7 +166,7 @@ text-generation-webui
 │   ├── llama-13b.ggmlv3.q4_K_M.bin
 ```
 
-Those models must be downloaded manually, as they are not currently supported by the automated downloader.
+In both cases, you can use the "Model" tab of the UI to download the model from Hugging Face automatically. It is also possible to download via the command-line with `python download-model.py organization/model` (use `--help` to see all the options).
 
 #### GPT-4chan
 
@@ -258,7 +260,7 @@ Optionally, you can use the following command-line flags:
 | `--quant_type QUANT_TYPE`                   | quant_type for 4-bit. Valid options: nf4, fp4. |
 | `--use_double_quant`                        | use_double_quant for 4-bit. |
 
-#### GGML (for llama.cpp and ctransformers)
+#### GGML/GGUF (for llama.cpp and ctransformers)
 
 | Flag        | Description |
 |-------------|-------------|
@@ -269,16 +271,16 @@ Optionally, you can use the following command-line flags:
 
 #### llama.cpp
 
-| Flag        | Description |
-|-------------|-------------|
-| `--no-mmap` | Prevent mmap from being used. |
-| `--mlock`   | Force the system to keep the model in RAM. |
+| Flag          | Description |
+|---------------|---------------|
+| `--no-mmap`   | Prevent mmap from being used. |
+| `--mlock`     | Force the system to keep the model in RAM. |
 | `--mul_mat_q` | Activate new mulmat kernels. |
 | `--cache-capacity CACHE_CAPACITY`   | Maximum cache capacity. Examples: 2000MiB, 2GiB. When provided without units, bytes will be assumed. |
-| `--tensor_split TENSOR_SPLIT` | Split the model across multiple GPUs, comma-separated list of proportions, e.g. 18,17 |
-| `--llama_cpp_seed SEED` | Seed for llama-cpp models. Default 0 (random). |
-| `--n_gqa N_GQA`         | grouped-query attention. Must be 8 for llama-2 70b. |
-| `--rms_norm_eps RMS_NORM_EPS`  | 5e-6 is a good value for llama-2 models. |
+| `--tensor_split TENSOR_SPLIT`  | Split the model across multiple GPUs, comma-separated list of proportions, e.g. 18,17 |
+| `--llama_cpp_seed SEED`        | Seed for llama-cpp models. Default 0 (random). |
+| `--n_gqa N_GQA`                | GGML only (not used by GGUF): Grouped-Query Attention. Must be 8 for llama-2 70b. |
+| `--rms_norm_eps RMS_NORM_EPS`  | GGML only (not used by GGUF): 5e-6 is a good value for llama-2 models. |
 | `--cpu`                        | Use the CPU version of llama-cpp-python instead of the GPU-accelerated version. |
 |`--cfg-cache`                   | llamacpp_HF: Create an additional cache for CFG negative prompts. |
 
